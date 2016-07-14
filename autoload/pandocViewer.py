@@ -20,7 +20,6 @@ class Preview(QtGui.QWidget):
         self.setWindowTitle("Preview")
         self.resize(768, 900)
 
-        # self.css = "C:\Users\michi\Desktop\github.css"
         self.css = os.path.join(os.path.dirname(__file__), "github.css")
 
         self.createUI()
@@ -91,10 +90,8 @@ class Preview(QtGui.QWidget):
     def dummy(self, num):
         frame = self.web.page().mainFrame()
         maxHeight = frame.scrollBarMaximum(QtCore.Qt.Vertical)
-        print maxHeight
 
         currentHeight = int(maxHeight * (num / 100.0))
-        print currentHeight
         frame.setScrollPosition(QtCore.QPoint(0, currentHeight))
 
     def setLocalFile(self):
