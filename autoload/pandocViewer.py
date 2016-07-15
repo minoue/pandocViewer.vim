@@ -4,7 +4,6 @@
 import os
 import sys
 import pypandoc
-from functools import partial
 from PySide import QtGui, QtCore, QtWebKit
 
 PY_FILE = sys.argv[0]
@@ -25,11 +24,14 @@ class Preview(QtGui.QWidget):
         self.createUI()
         self.layoutUI()
 
+        self.url = None
+
     def setWatcher(self, watcher):
         self.watcher = watcher
 
     def createUI(self):
         self.web = self.createView()
+        self.web.loadFinished.connect(self.loaded)
 
         self.addressLE = QtGui.QLineEdit(CURRENT_FILE)
         self.addressLE.returnPressed.connect(self.setAddress)
@@ -74,25 +76,15 @@ class Preview(QtGui.QWidget):
             extra_args=["-c %s" % self.css])
         return output
 
-    def reload(self):
-        md_path = self.addressLE.text()
-        md = self.convert(md_path)
-        self.web.setHtml(md)
-
     def setAddress(self):
         md_path = self.addressLE.text()
         md = self.convert(md_path)
         self.web.setHtml(md)
 
+        self.url = md_path
+
         if md_path not in self.watcher.files():
             self.watcher.addPath(md_path)
-
-    def dummy(self, num):
-        frame = self.web.page().mainFrame()
-        maxHeight = frame.scrollBarMaximum(QtCore.Qt.Vertical)
-
-        currentHeight = int(maxHeight * (num / 100.0))
-        frame.setScrollPosition(QtCore.QPoint(0, currentHeight))
 
     def setLocalFile(self):
         f = self.fileDialog()
@@ -105,25 +97,37 @@ class Preview(QtGui.QWidget):
 
         return QtGui.QFileDialog.getOpenFileName()[0]
 
+    def reloadPage(self):
+        """ Reload current content """
 
-def file_changed(*args):
-    window = args[0]
-    window.reload()
+        md = self.convert(self.url)
+        self.web.setHtml(md)
 
-    if os.path.exists(LINE_FILE):
-        lineInfoFile = open(LINE_FILE, 'r')
-        line = int(lineInfoFile.read().split()[0])
-        window.dummy(line)
+    def loaded(self):
+        """ Set page scrollbar height after loaded """
+
+        if os.path.exists(LINE_FILE):
+            lineInfoFile = open(LINE_FILE, 'r')
+            lineNum = int(lineInfoFile.read().split()[0])
+            lineInfoFile.close()
+        else:
+            lineNum = 0
+
+        frame = self.web.page().mainFrame()
+        maxHeight = frame.scrollBarMaximum(QtCore.Qt.Vertical)
+        currentHeight = int(maxHeight * (lineNum / 100.0))
+        frame.setScrollPosition(QtCore.QPoint(0, currentHeight))
 
 
 def main():
     app = QtGui.QApplication(sys.argv)
     w = Preview()
     watcher = QtCore.QFileSystemWatcher()
-    watcher.fileChanged.connect(partial(file_changed, w))
+    watcher.fileChanged.connect(w.reloadPage)
     w.setWatcher(watcher)
     w.show()
     w.raise_()
+    w.setAddress()
     sys.exit(app.exec_())
 
 
