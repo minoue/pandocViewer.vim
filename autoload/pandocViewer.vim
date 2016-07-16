@@ -12,7 +12,7 @@ function! pandocViewer#RunPandccPreview() abort
     if has('win32') || has('win64')
         silent exe "!start python " . shellescape(s:pyscript) . " " . shellescape(l:current_file)
     else
-        echo ""
+        call system("python " . s:pyscript . " " . l:current_file . " &")
     endif
 endfunction
 
