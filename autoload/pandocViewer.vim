@@ -6,7 +6,7 @@ let s:pyscript_dir = s:this_dir . "/pandocViewer.py"
 let s:pyscript = substitute(s:pyscript_dir, "\\", "/", "g")
 
 function! pandocViewer#RunPandccPreview() abort
-    let l:current_file = "%:p"
+    let l:current_file = expand("%:p")
     python import sys
     python sys.argv = ("arg1")
     if has('win32') || has('win64')
