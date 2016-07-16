@@ -4,7 +4,11 @@
 import os
 import sys
 import pypandoc
-from PySide import QtGui, QtCore, QtWebKit
+try:
+    from PySide import QtGui, QtCore, QtWebKit
+except ImportError:
+    from PyQt4 import QtGui, QtCore, QtWebKit
+
 
 PY_FILE = sys.argv[0]
 CURRENT_FILE = sys.argv[-1]
@@ -69,15 +73,20 @@ class Preview(QtGui.QWidget):
         self.setLayout(layout)
 
     def convert(self, path):
-        markdown_path = self.addressLE.text()
-        output = pypandoc.convert(
-            markdown_path,
-            "html",
-            extra_args=["-c %s" % self.css])
+        markdown_path = str(self.addressLE.text())
+
+        try:
+            output = pypandoc.convert(
+                markdown_path,
+                "html",
+                extra_args=["-c %s" % self.css])
+        except RuntimeError:
+            output = ""
+
         return output
 
     def setAddress(self):
-        md_path = self.addressLE.text()
+        md_path = str(self.addressLE.text())
         md = self.convert(md_path)
         self.web.setHtml(md)
 
@@ -95,7 +104,7 @@ class Preview(QtGui.QWidget):
     def fileDialog(self):
         """ File dialog """
 
-        return QtGui.QFileDialog.getOpenFileName()[0]
+        return QtGui.QFileDialog.getOpenFileName()
 
     def reloadPage(self):
         """ Reload current content """
