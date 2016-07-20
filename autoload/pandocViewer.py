@@ -11,7 +11,8 @@ except ImportError:
 
 
 PY_FILE = sys.argv[0]
-CURRENT_FILE = sys.argv[-1]
+CURRENT_FILE = sys.argv[1]
+CSS = sys.argv[2]
 LINE_FILE = os.path.join(os.path.dirname(PY_FILE), "pandocViewer_lineInfo.txt")
 
 
@@ -23,7 +24,7 @@ class Preview(QtGui.QWidget):
         self.setWindowTitle("Preview")
         self.resize(768, 900)
 
-        self.css = os.path.join(os.path.dirname(__file__), "github.css")
+        # self.css = os.path.join(os.path.dirname(__file__), "github.css")
 
         self.createUI()
         self.layoutUI()
@@ -57,7 +58,7 @@ class Preview(QtGui.QWidget):
         webSettings.setAttribute(
             QtWebKit.QWebSettings.LocalStorageDatabaseEnabled, True)
         web.setStyleSheet("background-color: white")
-        webSettings.setUserStyleSheetUrl(QtCore.QUrl.fromLocalFile(self.css))
+        webSettings.setUserStyleSheetUrl(QtCore.QUrl.fromLocalFile(CSS))
 
         return web
 
@@ -79,7 +80,7 @@ class Preview(QtGui.QWidget):
             output = pypandoc.convert(
                 markdown_path,
                 "html",
-                extra_args=["-c %s" % self.css])
+                extra_args=["-c %s" % CSS])
         except RuntimeError:
             output = ""
 
