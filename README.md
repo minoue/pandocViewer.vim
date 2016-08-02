@@ -17,6 +17,14 @@ A simple previewer for markup languages in vim
 :PandocPreview
 ```
 
+
 ## CSS
+
+### Using custom css
+```
+let g:pandocViewer_css_path = "/PATH/TO/CSS/FILE.css"
+```
+
+### Included CSS
 Github [css](https://gist.github.com/andyferra/2554919) by
 (c)Andy Ferra 
